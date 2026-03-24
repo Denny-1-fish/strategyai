@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StrategyAI</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    background: #0b0b0b;
+    color: gold;
+    font-family: Arial;
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background: black;
+    color: gold;
+    border: 1px solid gold;
+}
+
+button {
+    background: gold;
+    color: black;
+    font-weight: bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>StrategyAI</h2>
+
+<input id="price" placeholder="售價">
+<input id="cost" placeholder="成本">
+
+<select id="time">
+<option value="12">中午</option>
+<option value="20">晚上</option>
+</select>
+
+<button onclick="run()">分析</button>
+
+<pre id="result"></pre>
+
+<canvas id="chart"></canvas>
+
+<hr>
+
+<h3>AI顧問</h3>
+<input id="q" placeholder="問問題">
+<button onclick="ask()">詢問</button>
+
+<pre id="chat"></pre>
+
+<script>
+
+const API = "https://你的Render網址"
+
+async function run(){
+ let price = document.getElementById("price").value
+ let cost = document.getElementById("cost").value
+ let time = document.getElementById("time").value
+
+ let res = await fetch(`${API}/analyze?price=${price}&time=${time}&cost=${cost}`)
+ let data = await res.json()
+
+ document.getElementById("result").innerText =
+`收益：${data["收益"]}
+利潤：${data["利潤"]}
+最佳價格：${data["最佳價格"]}
+
+策略：
+${data["策略"].join("\n")}`
+
+ drawChart(data["價格曲線"], data["利潤曲線"])
+}
+
+function drawChart(p, prof){
+ new Chart(document.getElementById("chart"), {
+  type: 'line',
+  data: {
+    labels: p,
+    datasets: [{
+      label: "利潤",
+      data: prof
+    }]
+  }
+ })
+}
+
+async function ask(){
+ let q = document.getElementById("q").value
+ let res = await fetch(`${API}/chat?q=${q}`)
+ let data = await res.json()
+ document.getElementById("chat").innerText = data.reply
+}
+
+</script>
+
+</body>
+</html>
